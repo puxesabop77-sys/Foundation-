@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FEI Junior Player</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins,sans-serif}
+body{background:#050505;color:#fff}
+.header{height:70px;background:#0b0b0b;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;padding:0 20px;position:sticky;top:0}
+.logo{font-weight:800;font-size:28px}
+.home{color:#fff;text-decoration:none;background:#111;padding:10px 16px;border-radius:10px}
+.hero{padding:25px}
+.hero h1{font-size:42px}
+.hero p{color:#aaa}
+.search{padding:0 25px 20px}
+.search input{width:100%;padding:14px;border-radius:12px;border:none;background:#111;color:#fff}
+.layout{display:grid;grid-template-columns:2fr 1fr;gap:20px;padding:0 25px 25px}
+.playerbox,.sidebar{background:#0c0c0c;border:1px solid #222;border-radius:20px;padding:15px}
+#player{width:100%;aspect-ratio:16/9}
+.card{display:flex;gap:10px;padding:10px;border-radius:12px;background:#111;margin-bottom:10px;cursor:pointer}
+.card img{width:120px;height:70px;object-fit:cover;border-radius:8px}
+.card:hover{background:#1a1a1a}
+.sidebar{max-height:75vh;overflow:auto}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.hero h1{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="header">
+<div class="logo">FEI Junior</div>
+<a class="home" href="index.html">Home</a>
+</div>
+
+<div class="hero">
+<h1>Classes 5–8 Video Library</h1>
+<p>Netflix Style Learning Portal</p>
+</div>
+
+<div class="search">
+<input id="searchBox" placeholder="Search videos and press Enter">
+</div>
+
+<div class="layout">
+<div class="playerbox">
+<div id="player"></div>
+<h2 id="videoTitle">Search and play a video</h2>
+</div>
+
+<div class="sidebar" id="results"></div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+
+function onYouTubeIframeAPIReady(){
+ player=new YT.Player('player',{
+  height:'100%',
+  width:'100%',
+  playerVars:{autoplay:0,controls:1,rel:0}
+ });
+}
+
+async function searchVideos(q){
+ const res=await fetch('/api/youtube?q='+encodeURIComponent(q));
+ const data=await res.json();
+ const results=document.getElementById('results');
+ results.innerHTML='';
+
+ data.forEach(v=>{
+   const card=document.createElement('div');
+   card.className='card';
+   card.innerHTML=`
+   <img src="${v.thumbnail}">
+   <div><h4>${v.title}</h4></div>`;
+
+   card.onclick=()=>{
+      player.loadVideoById(v.videoId);
+      document.getElementById('videoTitle').innerText=v.title;
+   };
+   results.appendChild(card);
+ });
+}
+
+document.getElementById('searchBox').addEventListener('keypress',e=>{
+ if(e.key==='Enter'){
+   searchVideos(e.target.value);
+ }
+});
+
+window.onload=()=>{
+ searchVideos('Class 5 Mathematics');
+};
+</script>
+</body>
+</html>
